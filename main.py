@@ -17,6 +17,7 @@ import dataset as d
 from train.models.encoder_resnet import EncoderResnet
 from torch import optim
 import pandas as pd
+import argparse
 
 from train.trainer import trainer
 
@@ -32,19 +33,19 @@ def seed_everything(seed):
     torch.backends.cudnn.benchmark = True
 
 
-def main():
+def get_gpu(gpu_id):
+    if gpu_id  == 1 and torch.cuda.is_available():
+        device = torch.device('cuda:0')
+    elif gpu_id == 2 and torch.backends.mps.is_available():
+        device = torch.device("mps")
+    else:
+        device = torch.device("cpu")
+    return device
 
-    CFG = {
-        'IMG_SIZE':224,
-        'EPOCHS':1000, #Your Epochs,
-        'LR':1e-5, #Your Learning Rate,
-        'BATCH_SIZE': 32, #Your Batch Size,
-        'SEED':41,
-        'num_worker' : multiprocessing.cpu_count(),
-        'EARLY_STOP' : 10
-    }
 
-    seed_everything(CFG['SEED']) # Seed 고정
+def main(config):
+
+    seed_everything(config['seed']) # Seed 고정
 
     train_mean = (0.4194325, 0.3830166, 0.3490198)
     train_Std = (0.23905228, 0.2253936, 0.22334467)
@@ -56,22 +57,21 @@ def main():
     valid_data = pd.read_csv('./data/open/valid_data.csv')
     test_data = pd.read_csv('./data/open/test_data.csv')
 
-    train_transform = d.ImageTransForm(CFG['IMG_SIZE'], train_mean, train_Std)
-    valid_transform = d.ImageTransForm(CFG['IMG_SIZE'], valid_mean, valid_Std)
+    train_transform = d.ImageTransForm(config['img_size'], train_mean, train_Std)
+    valid_transform = d.ImageTransForm(config['img_size'], valid_mean, valid_Std)
 
     train_dataset = d.CustomDataset(train_data, 'train', transform=train_transform)
     valid_dataset = d.CustomDataset(valid_data, 'valid', transform=valid_transform)
 
 
 
-    train_loader = DataLoader(train_dataset, batch_size=CFG['BATCH_SIZE'], shuffle=True,num_workers=CFG['num_worker'], pin_memory=True)
-    valid_loader = DataLoader(valid_dataset, batch_size=CFG['BATCH_SIZE'], shuffle=True, num_workers=CFG['num_worker'], pin_memory=True)
+    train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True,num_workers=config['num_worker'], pin_memory=True)
+    valid_loader = DataLoader(valid_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=config['num_worker'], pin_memory=True)
 
     dataloader_dict = {'train': train_loader, 'valid': valid_loader}
 
     encoder = EncoderResnet(512)
-    #torch.cuda.get_device_name(0)
-    device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
+    device = get_gpu(config['gpu_id'])
     print(device)
     torch.cuda.is_available()
     print(encoder)
@@ -82,15 +82,30 @@ def main():
     criterion.to(device)
     encoder.to(device)
 
-    train_history, valid_history = trainer(encoder, dataloader_dict=dataloader_dict, criterion=criterion, num_epoch=CFG['EPOCHS'], optimizer=optimizer, device=device, early_stop=CFG['EARLY_STOP'])
+    train_history, valid_history = trainer(encoder, dataloader_dict=dataloader_dict, criterion=criterion, num_epoch=config['epochs'], optimizer=optimizer, device=device, early_stop=config['early_stop'])
     return train_history, valid_history
 
 
-
-
 if __name__ == "__main__":
-    train_history, valid_history = main()
+    parser = argparse.ArgumentParser()
 
-    pd = pd.DataFrame(columns=['train_loss', 'test_loss'],
-                      data=[(train, valid) for train, valid in zip(train_history, valid_history)])
-    pd.to_csv('loss.csv')
+
+    parser.add_argument("--epochs", type=int, default=100)
+    parser.add_argument('--early_stop', type=int, default=10)
+    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--lr', type=float, default=1e-5)
+
+    parser.add_argument("--gpu_id", type=int, default=0)
+    args = parser.parse_args()
+    args.seed = 41
+    args.img_size = 224
+    args.num_worker = multiprocessing.cpu_count()
+    #
+    #
+    config = vars(args)
+    #
+    train_history, valid_history = main(config)
+
+    # pd = pd.DataFrame(columns=['train_loss', 'test_loss'],
+    #                   data=[(train, valid) for train, valid in zip(train_history, valid_history)])
+    # pd.to_csv('loss.csv')
