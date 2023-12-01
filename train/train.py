@@ -27,9 +27,6 @@ def train(model, train_dataloader, optimizer, criterion_dict, device, word2idx):
         else:
             caption_target = comments_tensor[:, 1:]
             loss_mos = criterion_dict['mos'](predicted_mos.to(torch.float64), mos.to(torch.float64))
-            print(predicted_caption.device)
-            print(predicted_caption.view(-1, 29766).device)
-            print(predicted_mos.device)
             loss_caption = criterion_dict['caption'](predicted_caption.view(-1, 41100), caption_target.reshape(-1))
             loss = loss_mos + loss_caption
         loss.backward()
