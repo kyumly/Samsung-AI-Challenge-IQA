@@ -12,7 +12,6 @@ class EncoderGoogleNet(nn.Module):
         self.mos3 = nn.Linear(output, 1)
 
     def forward(self, img, phase= False):
-        print(img.shape)
         if  phase:
             out1, out2, out3 = self.cnn_backbone(img)
             mos_out1 = self.mos1(out1)
