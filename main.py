@@ -67,8 +67,6 @@ def main(config):
 
     criterion_mos.to(device)
     criterion_caption.to(device)
-    encoder.to(device)
-    decoder.to(device)
     model.to(device)
 
     dataloader_dict = {'train': train_loader, 'valid': valid_loader}

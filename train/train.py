@@ -8,7 +8,6 @@ def train(model, train_dataloader, optimizer, criterion_dict, device, word2idx):
 
     model.train()
     for img, mos, comment in tqdm(train_dataloader):
-        print("시작")
         img = img.to(device)
         mos = mos.to(device)
 
@@ -21,7 +20,7 @@ def train(model, train_dataloader, optimizer, criterion_dict, device, word2idx):
 
         predicted_caption, predicted_mos = model(img, comments_tensor)
 
-        if not predicted_caption:
+        if False:
             mos_loss1 = criterion_dict['mos'](predicted_mos[0].to(torch.float64), mos.to(torch.float64))
             mos_loss2 = criterion_dict['mos'](predicted_mos[0].to(torch.float64), mos.to(torch.float64))
             mos_loss3 = criterion_dict['mos'](predicted_mos[0].to(torch.float64), mos.to(torch.float64))
@@ -29,7 +28,10 @@ def train(model, train_dataloader, optimizer, criterion_dict, device, word2idx):
         else:
             caption_target = comments_tensor[:, 1:]
             loss_mos = criterion_dict['mos'](predicted_mos.to(torch.float64), mos.to(torch.float64))
-            loss_caption = criterion_dict['caption'](comments_tensor.view(-1, comment.size(-1)), caption_target.reshape(-1))
+            print(predicted_caption.device)
+            print(predicted_caption.view(-1, 29766).device)
+            print(predicted_mos.device)
+            loss_caption = criterion_dict['caption'](predicted_caption.view(-1, 41100), caption_target.reshape(-1))
             loss = loss_mos + loss_caption
         loss.backward()
         optimizer.step()
