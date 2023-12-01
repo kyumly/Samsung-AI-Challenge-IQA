@@ -24,9 +24,17 @@ def train(model, train_dataloader, optimizer, criterion_dict, device, word2idx):
         loss = loss_mos + loss_caption
 
         optimizer.zero_grad()
+        if type(model).__name__ == 'EncoderGoogleNet':
+            mos1, mos2, mos3 = model(x, True)
+            mos_loss1 = criterion(mos1.to(torch.float64), y.to(torch.float64))
+            mos_loss2 = criterion(mos2.to(torch.float64), y.to(torch.float64))
+            mos_loss3 = criterion(mos3.to(torch.float64), y.to(torch.float64))
+            loss = mos_loss1 + 0.3 * (mos_loss2 * mos_loss3)
+        else:
+            out, mos_pred = model(x)
+            loss = criterion(mos_pred.to(torch.float64), y.to(torch.float64))
         loss.backward()
         optimizer.step()
-
         epoch_loss += loss.item()
 
     return epoch_loss / len(train_dataloader)

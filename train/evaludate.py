@@ -2,10 +2,18 @@ import torch
 def evaluate(model, test_dataloader, criterion_dict, device, word2idx):
     epoch_loss = 0
     epoch_acc = 0
-    mask = 0
 
     model.eval()
     with torch.no_grad():
+        for img, mos, comment in tqdm(valid_dataloader):
+            x = img.to(device)
+            y = mos.to(device)
+            if type(model).__name__ == 'EncoderGoogleNet':
+                mos_pred  = model(x)
+            else:
+                out, mos_pred = model(x)
+
+            loss = criterion(mos_pred.to(torch.float64), y.to(torch.float64))
         for img, mos, comment in test_dataloader:
             img = img.to(device)
             mos = mos.to(device)
@@ -24,8 +32,26 @@ def evaluate(model, test_dataloader, criterion_dict, device, word2idx):
             loss = loss_mos + loss_caption
             epoch_loss += loss.item()
 
-            mask += 1
-            if mask == 100:
-                break
+    return epoch_loss / len(valid_dataloader)
 
-    return epoch_loss / len(test_dataloader)
+def test(model, valid_dataloader, criterion, device):
+    epoch_loss = 0
+    epoch_acc = 0
+
+    model.eval()
+
+    loss_history = []
+    with torch.no_grad():
+        for img, mos, comment in tqdm(valid_dataloader):
+            x = img.to(device)
+            y = mos.to(device)
+            if type(model).__name__ == 'EncoderGoogleNet':
+                mos_pred  = model(x)
+            else:
+                out, mos_pred = model(x)
+
+            loss = criterion(mos_pred.to(torch.float64), y.to(torch.float64))
+            loss_history.append(loss)
+            epoch_loss += loss.item()
+
+    return epoch_loss / len(valid_dataloader), loss_history

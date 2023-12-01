@@ -8,7 +8,6 @@ from torch.utils.tensorboard import SummaryWriter
 def trainer(model, dataloader_dict, num_epoch, optimizer, criterion_dict, early_stop,device,word2idx):
     EPOCHS = num_epoch
     train_history, valid_history = [], []
-    from torch.utils.tensorboard import SummaryWriter
     writer = SummaryWriter('./logs/')
 
 
