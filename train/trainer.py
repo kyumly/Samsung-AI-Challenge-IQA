@@ -4,7 +4,6 @@ from train.evaludate import evaluate
 import torch
 from util.times import epoch_time
 from torch.utils.tensorboard import SummaryWriter
-from torch.utils.tensorboard import SummaryWriter
 
 
 def trainer(model, dataloader_dict, num_epoch, optimizer, criterion, early_stop,device):
@@ -17,7 +16,7 @@ def trainer(model, dataloader_dict, num_epoch, optimizer, criterion, early_stop,
     best_valid_loss = float('inf')
     for epoch in range(EPOCHS):
         start_time = time.monotonic()
-        train_loss = train(model, dataloader_dict['train'], optimizer, criterion, device)
+        #train_loss = train(model, dataloader_dict['train'], optimizer, criterion, device)
         valid_loss = evaluate(model, dataloader_dict['valid'], criterion, device)
 
         if valid_loss < best_valid_loss:
@@ -27,8 +26,9 @@ def trainer(model, dataloader_dict, num_epoch, optimizer, criterion, early_stop,
         if early_stop > 0 and lowest_epoch + early_stop < epoch + 1:
             print("There is no improvement during last %d epochs." % early_stop)
             break
-        train_history.append(train_loss)
+        #train_history.append(train_loss)
         valid_history.append(valid_loss)
+        return 0
 
         writer.add_scalar("Loss/train", train_loss, epoch)
         writer.add_scalar("Loss/valid", valid_loss, epoch)

@@ -42,7 +42,6 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path : str= f"{path}/data/open{self.dataframe.iloc[idx]['path']}.{self.dataframe.iloc[idx]['extension']}"
-
         img = Image.open(img_path).convert('RGB')
 
         if self.transform:

@@ -3,44 +3,16 @@ from util.preprocessing import  *
 import multiprocessing
 import torch
 import torch.nn as nn
-import pandas as pd
-import torchvision.transforms as transforms
-import torchvision.models as models
 from torch.utils.data import Dataset, DataLoader
-from PIL import Image
-from tqdm import tqdm
-import os
-import numpy as np
-import random
-import warnings
+
 import dataset as d
-from train.models.encoder_resnet import EncoderResnet
+
 from torch import optim
 import pandas as pd
 import argparse
 
 from train.trainer import trainer
-
-
-
-def seed_everything(seed):
-    random.seed(seed)
-    os.environ['PYTHONHASHSEED'] = str(seed)
-    np.random.seed(seed)
-    torch.manual_seed(seed)
-    torch.cuda.manual_seed(seed)
-    torch.backends.cudnn.deterministic = True
-    torch.backends.cudnn.benchmark = True
-
-
-def get_gpu(gpu_id):
-    if gpu_id  == 1 and torch.cuda.is_available():
-        device = torch.device('cuda:0')
-    elif gpu_id == 2 and torch.backends.mps.is_available():
-        device = torch.device("mps")
-    else:
-        device = torch.device("cpu")
-    return device
+from util.common import seed_everything, get_encoder, get_gpu
 
 
 def main(config):
@@ -64,14 +36,15 @@ def main(config):
     valid_dataset = d.CustomDataset(valid_data, 'valid', transform=valid_transform)
 
 
-
     train_loader = DataLoader(train_dataset, batch_size=config['batch_size'], shuffle=True,num_workers=config['num_worker'], pin_memory=True)
     valid_loader = DataLoader(valid_dataset, batch_size=config['batch_size'], shuffle=True, num_workers=config['num_worker'], pin_memory=True)
 
     dataloader_dict = {'train': train_loader, 'valid': valid_loader}
 
-    encoder = EncoderResnet(512)
+    encoder = get_encoder(config['model_name'], 512)
     device = get_gpu(config['gpu_id'])
+
+
     print(device)
     torch.cuda.is_available()
     print(encoder)
@@ -94,6 +67,7 @@ if __name__ == "__main__":
     parser.add_argument('--early_stop', type=int, default=10)
     parser.add_argument('--batch_size', type=int, default=32)
     parser.add_argument('--lr', type=float, default=1e-5)
+    parser.add_argument('--model_name', type=str, default='resnet')
 
     parser.add_argument("--gpu_id", type=int, default=0)
     args = parser.parse_args()

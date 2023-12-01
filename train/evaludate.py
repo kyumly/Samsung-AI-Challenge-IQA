@@ -11,10 +11,12 @@ def evaluate(model, valid_dataloader, criterion, device):
         for img, mos, comment in tqdm(valid_dataloader):
             x = img.to(device)
             y = mos.to(device)
-            out, mos_pred = model(x)
+            if type(model).__name__ == 'EncoderGoogleNet':
+                mos_pred  = model(x)
+            else:
+                out, mos_pred = model(x)
+
             loss = criterion(mos_pred.to(torch.float64), y.to(torch.float64))
             epoch_loss += loss.item()
-
-
 
     return epoch_loss / len(valid_dataloader)
