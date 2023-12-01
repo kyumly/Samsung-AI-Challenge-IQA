@@ -17,13 +17,17 @@ class Seq2seq(nn.Module):
         seq_len = comments.shape[1]
         vocab_size = self.decoder.output_dim
 
-        input = comments[:, 0].to(self.device)
-        target = comments[:, 1:].to(self.device)
+        input = comments[:, 0]
+        target = comments[:, 1:]
 
-        outputs = torch.zeros(batch_size, seq_len - 1, vocab_size).to(self.device)
+        outputs = torch.zeros(batch_size, seq_len - 1, vocab_size)
 
         # imgfeature 뽑기 (디코더의 첫번째 h) 및 Encoder mos 저장
-        decoder_hidden, mos = self.encoder.forward(imgs)
+        if type(self.encoder).__name__ == 'EncoderGoogleNet':
+            mos1, mos2, mos3 = self.encoder(imgs, True)
+            return None, [mos1, mos2, mos3]
+        else:
+            decoder_hidden, mos = self.encoder.forward(imgs)
 
         # dimension 맞춰주기
         decoder_hidden = decoder_hidden.unsqueeze(dim=0)  # (1, batch_size, hidden_size)

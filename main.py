@@ -53,19 +53,13 @@ def main(config):
     output_dim = len(vocab)
     num_layers = 1
 
-    dataloader_dict = {'train': train_loader, 'valid': valid_loader}
-
-    encoder = get_encoder(config['model_name'], 512)
     device = get_gpu(config['gpu_id'])
-
-
     print(device)
-    torch.cuda.is_available()
-    print(encoder)
-    device = torch.device('cuda:0' if torch.cuda.is_available() else "cpu")
-    encoder = EncoderResnet(hidden_dim)
+
+    encoder = get_encoder(config['model_name'], hidden_dim)
     decoder = DecoderSeq(output_dim, embed_dim, hidden_dim, num_layers)
-    model = Seq2seq(encoder, decoder, device)
+    model = Seq2seq(encoder, decoder, word2idx, device)
+    print(model)
 
     criterion_mos = nn.MSELoss()
     criterion_caption = nn.CrossEntropyLoss()
@@ -81,8 +75,8 @@ def main(config):
     criterion_dict = {'mos': criterion_mos, 'caption': criterion_caption}
 
     train_history, valid_history = trainer(model, dataloader_dict=dataloader_dict, criterion_dict=criterion_dict,
-                                           num_epoch=CFG['EPOCHS'], optimizer=optimizer, device=device,
-                                           early_stop=CFG['EARLY_STOP'], word2idx=word2idx)
+                                           num_epoch=config['epochs'], optimizer=optimizer, device=device,
+                                           early_stop=config['early_stop'], word2idx=word2idx)
     return train_history, valid_history
 
 
@@ -92,11 +86,11 @@ if __name__ == "__main__":
 
     parser.add_argument("--epochs", type=int, default=100)
     parser.add_argument('--early_stop', type=int, default=10)
-    parser.add_argument('--batch_size', type=int, default=32)
+    parser.add_argument('--batch_size', type=int, default=8)
     parser.add_argument('--lr', type=float, default=1e-5)
     parser.add_argument('--model_name', type=str, default='resnet')
 
-    parser.add_argument("--gpu_id", type=int, default=0)
+    parser.add_argument("--gpu_id", type=int, default=1)
     args = parser.parse_args()
     args.seed = 41
     args.img_size = 224
