@@ -1,7 +1,7 @@
 import torch
 from tqdm import tqdm
 
-def train(model, train_dataloader, optimizer, criterion, device):
+def train(model, train_dataloader, optimizer, criterion, device, model_name = None):
     epoch_loss = 0
     epoch_acc = 0
     mask = 0
@@ -11,11 +11,17 @@ def train(model, train_dataloader, optimizer, criterion, device):
         y = mos.to(device)
 
         optimizer.zero_grad()
-        out, mos_pred = model(x)
-        loss = criterion(mos_pred.to(torch.float64), y.to(torch.float64))
+        if model_name:
+            mos1, mos2, mos3 = model(x)
+            mos_loss1 = criterion(mos1.to(torch.float64), y.to(torch.float64))
+            mos_loss2 = criterion(mos2.to(torch.float64), y.to(torch.float64))
+            mos_loss3 = criterion(mos3.to(torch.float64), y.to(torch.float64))
+            loss = mos_loss1 + 0.3 * (mos_loss2 * mos_loss3)
+        else:
+            out, mos_pred = model(x)
+            loss = criterion(mos_pred.to(torch.float64), y.to(torch.float64))
         loss.backward()
         optimizer.step()
-
         epoch_loss += loss.item()
 
 

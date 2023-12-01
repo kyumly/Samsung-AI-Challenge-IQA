@@ -4,11 +4,12 @@ from train.evaludate import evaluate
 import torch
 from util.times import epoch_time
 from torch.utils.tensorboard import SummaryWriter
+from torch.utils.tensorboard import SummaryWriter
+
 
 def trainer(model, dataloader_dict, num_epoch, optimizer, criterion, early_stop,device):
     EPOCHS = num_epoch
     train_history, valid_history = [], []
-    from torch.utils.tensorboard import SummaryWriter
     writer = SummaryWriter('./logs/')
 
 
@@ -31,8 +32,6 @@ def trainer(model, dataloader_dict, num_epoch, optimizer, criterion, early_stop,
 
         writer.add_scalar("Loss/train", train_loss, epoch)
         writer.add_scalar("Loss/valid", valid_loss, epoch)
-
-
 
         end_time = time.monotonic()
         epoch_mins, epoch_secs = epoch_time(start_time, end_time)
