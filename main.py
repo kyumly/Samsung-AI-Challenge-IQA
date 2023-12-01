@@ -80,6 +80,6 @@ if __name__ == "__main__":
     #
     train_history, valid_history = main(config)
 
-    # pd = pd.DataFrame(columns=['train_loss', 'test_loss'],
-    #                   data=[(train, valid) for train, valid in zip(train_history, valid_history)])
-    # pd.to_csv('loss.csv')
+    pd = pd.DataFrame(columns=['train_loss', 'test_loss'],
+                      data=[(train, valid) for train, valid in zip(train_history, valid_history)])
+    pd.to_csv('loss.csv')
