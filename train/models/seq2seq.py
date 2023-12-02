@@ -1,15 +1,14 @@
 import torch.nn as nn
 import torch
 import random
-
+# 깃허브 테스트 12021325
 
 class Seq2seq(nn.Module):
-    def __init__(self, encoder, decoder, word2idx, device):
+    def __init__(self, encoder, decoder, device):
         super().__init__()
 
         self.encoder = encoder
         self.decoder = decoder
-        self.word2idx = word2idx
         self.device = device
 
     def forward(self, imgs, comments, teacher_forcing_ratio=0.5):
