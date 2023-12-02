@@ -1,10 +1,8 @@
-from train.models.encoder_resnet import EncoderResnet
-from train.models.encoder_googlenet import EncoderGoogleNet
 import os
 import torch
 import numpy as np
 import random
-
+from torchvision import models
 
 def seed_everything(seed):
     random.seed(seed)
@@ -25,11 +23,30 @@ def get_gpu(gpu_id):
         device = torch.device("cpu")
     return device
 
+def get_backbone(model_name):
+    if model_name == "efficient":
+        cnn = models.efficientnet_b4(pretrained=True)
+    elif model_name == 'vgg':
+        cnn = models.vgg16(pretrained=True)
+    elif model_name == "resnet":
+        cnn = models.resnet50(pretrained=True)
+    else:
+        cnn = ["에러"]
+    return list(cnn.children())[:-1]
+
 
 def get_encoder(model_name, output):
+    from train.models.encoder_resnet import EncoderResnet
+    from train.models.encoder_googlenet import EncoderGoogleNet
+    from train.models.encoder_efficient import Encoderefficient
+
     if model_name == "resnet":
         return EncoderResnet(output)
     elif model_name == "google":
         return EncoderGoogleNet(output)
+    elif model_name == 'efficient':
+        return Encoderefficient(output)
     else:
         return EncoderResnet(output)
+
+
