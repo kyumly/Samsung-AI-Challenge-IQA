@@ -58,7 +58,7 @@ def main(config):
 
     encoder = get_encoder(config['model_name'], hidden_dim)
     decoder = DecoderSeq(output_dim, embed_dim, hidden_dim, num_layers)
-    model = Seq2seq(encoder, decoder, word2idx, device)
+    model = Seq2seq(encoder, decoder, device)
     print(model)
 
     criterion_mos = nn.MSELoss()

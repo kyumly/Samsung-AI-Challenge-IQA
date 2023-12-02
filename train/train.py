@@ -15,28 +15,21 @@ def train(model, train_dataloader, optimizer, criterion_dict, device, word2idx):
             tokenized = ['<SOS>'] + comment.split() + ['<EOS>']
             comments_tensor[i, :len(tokenized)] = torch.tensor([word2idx[word] for word in tokenized])
 
-        predicted_caption, predicted_mos = model(img, comments_tensor)
-
-        caption_target = comments_tensor[:, 1:]
-
-        loss_mos = criterion_dict['mos'](predicted_mos.to(torch.float64), mos.to(torch.float64))
-        loss_caption = criterion_dict['caption'](predicted_caption.view(-1, predicted_caption.size(-1)), caption_target.reshape(-1))
-        loss = loss_mos + loss_caption
-
         optimizer.zero_grad()
-        comments_tensor =comments_tensor.to(device)
 
-        predicted_caption, predicted_mos = model(img, comments_tensor)
-
-        if False:
-            mos_loss1 = criterion_dict['mos'](predicted_mos[0].to(torch.float64), mos.to(torch.float64))
-            mos_loss2 = criterion_dict['mos'](predicted_mos[0].to(torch.float64), mos.to(torch.float64))
-            mos_loss3 = criterion_dict['mos'](predicted_mos[0].to(torch.float64), mos.to(torch.float64))
+        if type(model.encoder).__name__ == 'EncoderGoogleNet':
+            mos1, mos2, mos3 = model.encoder(img, True)
+            mos_loss1 = criterion_dict['mos'](mos1.to(torch.float64), mos.to(torch.float64))
+            mos_loss2 = criterion_dict['mos'](mos2.to(torch.float64), mos.to(torch.float64))
+            mos_loss3 = criterion_dict['mos'](mos3.to(torch.float64) , mos.to(torch.float64))
             loss = mos_loss1 + 0.3 * (mos_loss2 * mos_loss3)
         else:
+            comments_tensor = comments_tensor.to(device)
+            predicted_caption, predicted_mos = model(img, comments_tensor)
             caption_target = comments_tensor[:, 1:]
             loss_mos = criterion_dict['mos'](predicted_mos.to(torch.float64), mos.to(torch.float64))
-            loss_caption = criterion_dict['caption'](predicted_caption.view(-1, 41100), caption_target.reshape(-1))
+            loss_caption = criterion_dict['caption'](predicted_caption.view(-1, predicted_caption.size(-1)),
+                                                     caption_target.reshape(-1))
             loss = loss_mos + loss_caption
         loss.backward()
         optimizer.step()

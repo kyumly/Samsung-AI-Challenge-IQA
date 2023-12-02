@@ -18,25 +18,17 @@ def evaluate(model, valid_dataloader, criterion_dict, device, word2idx):
                 tokenized = ['<SOS>'] + comment.split() + ['<EOS>']
                 comments_tensor[i, :len(tokenized)] = torch.tensor([word2idx[word] for word in tokenized])
 
-
-            predicted_caption, predicted_mos = model(img, comments_tensor)
-            caption_target = comments_tensor[:,1:]
-
-            loss_mos = criterion_dict['mos'](predicted_mos.to(torch.float64), mos.to(torch.float64))
-            loss_caption = criterion_dict['caption'](predicted_caption.view(-1, predicted_caption.size(-1)), caption_target.reshape(-1))
-            loss = loss_mos + loss_caption
-            comments_tensor = comments_tensor.to(device)
-
             if type(model.encoder).__name__ == 'EncoderGoogleNet':
                 predicted_mos = model.encoder(img)
                 loss = criterion_dict['mos'](predicted_mos.to(torch.float64), mos.to(torch.float64))
             else:
+                comments_tensor = comments_tensor.to(device)
                 predicted_caption, predicted_mos = model(img, comments_tensor)
-                caption_target = comments_tensor[:,1:]
+                caption_target = comments_tensor[:, 1:]
                 loss_mos = criterion_dict['mos'](predicted_mos.to(torch.float64), mos.to(torch.float64))
-                loss_caption = criterion_dict['caption'](predicted_caption.view(-1, 41100), caption_target.reshape(-1))
+                loss_caption = criterion_dict['caption'](predicted_caption.view(-1, predicted_caption.size(-1)),
+                                                         caption_target.reshape(-1))
                 loss = loss_mos + loss_caption
-
             epoch_loss += loss.item()
 
     return epoch_loss / len(valid_dataloader)
