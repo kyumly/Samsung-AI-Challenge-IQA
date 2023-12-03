@@ -39,6 +39,7 @@ def get_encoder(model_name, output):
     from train.models.encoder_resnet import EncoderResnet
     from train.models.encoder_googlenet import EncoderGoogleNet
     from train.models.encoder_efficient import Encoderefficient
+    from train.models.encoder_vgg import EncoderVGG
 
     if model_name == "resnet":
         return EncoderResnet(output)
@@ -46,6 +47,8 @@ def get_encoder(model_name, output):
         return EncoderGoogleNet(output)
     elif model_name == 'efficient':
         return Encoderefficient(output)
+    elif model_name == 'vgg':
+        return EncoderVGG(output)
     else:
         return EncoderResnet(output)
 

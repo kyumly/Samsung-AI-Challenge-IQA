@@ -74,7 +74,7 @@ def main(config):
 
     train_history, valid_history = trainer(model, dataloader_dict=dataloader_dict, criterion_dict=criterion_dict,
                                            num_epoch=config['epochs'], optimizer=optimizer, device=device,
-                                           early_stop=config['early_stop'], word2idx=word2idx)
+                                           early_stop=config['early_stop'], word2idx=word2idx, model_name = config['model_name'])
     return train_history, valid_history
 
 
