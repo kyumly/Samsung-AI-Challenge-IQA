@@ -101,4 +101,4 @@ if __name__ == "__main__":
 
     pd = pd.DataFrame(columns=['train_loss', 'test_loss'],
                       data=[(train, valid) for train, valid in zip(train_history, valid_history)])
-    pd.to_csv('loss.csv', encoding='cp949', index=False)
+    pd.to_csv(f"{config['model_name']}_loss.csv", encoding='cp949', index=False)

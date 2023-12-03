@@ -9,7 +9,7 @@ def trainer(model, dataloader_dict, num_epoch, optimizer, criterion_dict, early_
 
     EPOCHS = num_epoch
     train_history, valid_history = [], []
-    writer = SummaryWriter('./logs/')
+    writer = SummaryWriter(f'./logs/{model_name}')
 
     lowest_epoch = 0
     best_valid_loss = float('inf')
