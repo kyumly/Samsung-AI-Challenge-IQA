@@ -29,11 +29,3 @@ class EncoderResnet(nn.Module):
         out = self.out(feature_out)
 
         return out, mos
-
-model = EncoderResnet(512)
-
-from torchsummary import summary
-print(summary(model, input_size=(3, 224,224), batch_size=1))
-
-
-

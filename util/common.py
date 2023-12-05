@@ -53,3 +53,21 @@ def get_encoder(model_name, output):
         return EncoderResnet(output)
 
 
+
+def compute_saliency_maps(X, y, model):
+
+    model.eval()
+
+    # Make input tensor require gradient
+    X.requires_grad_()
+
+    saliency = None
+    scores = model(X)
+    loss = scores[1].sum()
+    loss = loss / y.shape[0]
+    loss.backward()
+    #최댓값과, _ : 인덱스
+
+    saliency, _ = X.grad.abs().max(axis=1)
+    print(saliency.shape)
+    return saliency
