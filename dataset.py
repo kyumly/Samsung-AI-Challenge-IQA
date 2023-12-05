@@ -7,7 +7,7 @@ path = os.path.dirname(os.path.abspath(__file__))
 
 
 class ImageTransForm():
-    def __init__(self, resize, mean, std):
+    def __init__(self, resize, mean=0, std=0):
         self.data_tranform = {
             'train' : transforms.Compose([
                 transforms.RandomResizedCrop(resize, scale=(0.5, 1.0)),
@@ -21,6 +21,12 @@ class ImageTransForm():
                     transforms.CenterCrop(resize),
                     transforms.ToTensor(),
                     transforms.Normalize(mean, std)
+                ]
+            ),
+            'test' : transforms.Compose(
+                [
+                    transforms.CenterCrop(224),
+                    transforms.ToTensor()
                 ]
             )
         }
@@ -42,7 +48,6 @@ class CustomDataset(Dataset):
 
     def __getitem__(self, idx):
         img_path : str= f"{path}/data/open{self.dataframe.iloc[idx]['path']}.{self.dataframe.iloc[idx]['extension']}"
-
         img = Image.open(img_path).convert('RGB')
 
         if self.transform:
