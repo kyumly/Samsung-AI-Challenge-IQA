@@ -28,7 +28,8 @@ class Encoderefficient(nn.Module):
 
         return out, mos
 
-# model = Encoderefficient(512)
+model = Encoderefficient(512)
+print(model)
 # #a = models.efficientnet_b4()
 # #b = models.resnet50()
 # ##k = list(a.children())[:-1]
